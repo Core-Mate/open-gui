@@ -7,6 +7,36 @@ It includes a control Skill, local CLI/daemon, macOS ADB executable, and a read-
 device wall. It does not depend on, modify, install, update, or reload DSH.
 See [source provenance](SOURCE.md) and [privacy](docs/privacy.md).
 
+## Install on macOS
+
+Once a release is published, download `opengui-codex-<version>-install.command`
+and its `.sha256` from that same [Codex release](https://github.com/Core-Mate/OpenGUI/releases).
+Verify the checksum in the download directory, then run `bash <downloaded-installer>`.
+The installer downloads the matching prebuilt package, checks it, prepares private Node,
+and registers the standalone plugin using the native `codex plugin` commands.
+No Git, pnpm, source build, or Xcode is required; Codex CLI with plugin support is required.
+Start a **new chat**, choose OpenGUI, and ask to list connected phones without operating them.
+
+For agent-assisted installation, use the repository's
+[installation Skill](../../skills/opengui-plugin-install/SKILL.md) and say
+“Install OpenGUI for Codex”. The Skill resolves only complete releases for this host.
+There is no public standalone download until the release gates below are satisfied.
+
+The installer uses the independent `opengui-standalone` marketplace and leaves the
+repository's legacy marketplace unchanged. Finish OpenGUI tasks before upgrading.
+A same-name plugin from another source is reported instead of silently replaced.
+Packages and recovery inventories are retained under `~/.codex/opengui-codex/packages`
+(or the selected `CODEX_HOME`). On failure, inspect the printed recovery directory;
+source rollback is attempted through Codex commands, without resetting other settings.
+
+Maintainers can test an unpublished archive without installing build tools on the test Mac:
+
+```sh
+bash scripts/install-macos.command --archive /absolute/path/opengui-codex-0.1.0.tar.gz
+```
+
+The adjacent `.sha256` file is required. Build and package once on the maintainer machine.
+
 ## Development and verification
 
 Run commands from this directory:
@@ -28,8 +58,8 @@ On macOS, `node scripts/smoke-archive.mjs <plugin.tar.gz> <node-darwin.tar.gz>`
 verifies a packaged launcher using the checksum-pinned Node 22.23.2 archive in a
 temporary private cache. It does not connect to ADB or install into a Codex profile.
 
-For local Codex installation, stage this package into a separate disposable
-marketplace using Plugin Creator. Do not install both the legacy and standalone
+For development-only manual staging, use a separate disposable marketplace with Plugin Creator.
+The release installer above creates its own standalone source automatically. Do not install both the legacy and standalone
 `opengui` plugins into the same test task. Installing into your normal Codex
 profile or submitting to the public directory requires a separate user decision.
 

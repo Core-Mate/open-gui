@@ -48,6 +48,7 @@ jobs:
           cache-dependency-path: workbuddy-plugin/package-lock.json
       - run: npm ci
       - run: npm run pack:release
+      - run: node scripts/test-release-installer.mjs
       - run: npm run test:native
       - uses: actions/upload-artifact@v4
         with:

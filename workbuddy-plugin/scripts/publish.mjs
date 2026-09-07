@@ -10,7 +10,7 @@ const { version } = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'
 const tag = `opengui-workbuddy-v${version}`
 assert.equal(process.env.GITHUB_REF_NAME, tag, 'Only publish the exact independent WorkBuddy version tag')
 execFileSync(process.execPath, [join(root, 'scripts/validate.mjs'), '--release'], { cwd: root, stdio: 'inherit' })
-const assets = [`opengui-mcp-${version}.tgz`, `opengui-workbuddy-connector-${version}.zip`].flatMap(name => [name, `${name}.sha256`])
+const assets = [`opengui-mcp-${version}.tgz`, `opengui-workbuddy-connector-${version}.zip`, `opengui-workbuddy-${version}-install.command`].flatMap(name => [name, `${name}.sha256`])
 const gh = args => execFileSync('gh', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
 let exists = false
 try { gh(['release', 'view', tag, '--json', 'tagName']); exists = true } catch (error) {

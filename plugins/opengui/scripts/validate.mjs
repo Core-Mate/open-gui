@@ -10,6 +10,8 @@ import { stagePlugin } from './stage.mjs'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const json = async path => JSON.parse(await readFile(join(root, path), 'utf8'))
 const pkg = await json('package.json')
+assert((await readFile(join(root, 'scripts/install-macos.command'), 'utf8')).includes('VERSION=' + pkg.version + '\n'), 'Release installer version mismatch')
+execFileSync('/bin/bash', ['-n', join(root, 'scripts/install-macos.command')])
 const plugin = await json('.codex-plugin/plugin.json')
 assert.equal(plugin.name, 'opengui')
 assert.match(pkg.version, /^\d+\.\d+\.\d+$/)

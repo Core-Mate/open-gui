@@ -23,7 +23,7 @@ There is no DSH/Codex dependency, installer, UI injection, browser agent, custom
 - Node `^22.19.0 || >=24`, declared in the connector for WorkBuddy's managed runtime.
 - Bundled ADB: macOS arm64/x64, Linux x64, Windows x64. Other architectures need an explicit compatible `OPENGUI_ADB_PATH`; Unicode support is limited to the pinned scrcpy platforms.
 - Android USB debugging and user-approved authorization. The connector never accepts that authorization automatically.
-- First installation needs GitHub and npm access. Unicode input downloads a checksum-pinned official scrcpy archive on first use. A cached installation may be restarted offline after all required dependencies and scrcpy assets are cached.
+- First installation needs GitHub, nodejs.org and npm access. Unicode input downloads a checksum-pinned official scrcpy archive on first use. A cached installation may be restarted offline after all required dependencies and scrcpy assets are cached.
 
 Screenshots and visible phone data are returned to the current WorkBuddy model. They are not written to disk by this runtime, although WorkBuddy may retain tool results. Device-wall URLs contain private viewing capabilities; do not share them. HTTP serves only `127.0.0.1`, checks Host/Origin and per-session tokens, sends no-store headers, and loads no remote assets. The wall stops reading frames after session termination.
 
@@ -33,34 +33,26 @@ Do not run DSH, Codex, manual ADB, or another automation host against the same p
 
 ## Install on macOS
 
-This is the source-install path for the unpublished `0.2.0` candidate. Use macOS with WorkBuddy 5.5.3 as the acceptance baseline, a vision-and-tool-capable model, Git, Node.js 22.19+ within 22.x or 24+, and npm. Building the native helpers requires Xcode command-line tools (`xcode-select -p` checks availability). ADB is bundled and scrcpy is downloaded and verified automatically; no Homebrew installation is needed. Prebuilt-package users do not need Xcode, but there is no published candidate download yet.
+The host-specific release now includes `opengui-workbuddy-<version>-install.command`
+and its SHA-256 sidecar. After publication, download and verify the installer, quit
+WorkBuddy after finishing phone tasks, and run it with `bash`. It fetches the matching
+verified package, prepares private Node, installs with lifecycle scripts disabled,
+and invokes the configuration installer shipped inside the package. No source checkout,
+system Node, Xcode, or user-run tests are required. Existing MCP servers, Hooks,
+configuration backups and old version directories are preserved. Reopen WorkBuddy
+and trust the MCP before read-only device discovery.
 
-Clone the candidate into a new directory, without replacing an existing checkout:
+For unpublished candidates use `bash scripts/install-macos.command --archive /absolute/opengui-mcp-0.2.0.tgz`
+with the adjacent `.sha256` file. This does not bypass public release acceptance.
+See the [Chinese installation guide](README.zh-CN.md#macos-安装) and the
+[agent installation Skill](../skills/opengui-plugin-install/SKILL.md).
 
-```sh
-git clone --branch codex/workbuddy-vlm-persistent-mirror --single-branch \
-  https://github.com/Core-Mate/OpenGUI.git opengui-workbuddy-candidate
-cd opengui-workbuddy-candidate/workbuddy-plugin
-npm ci
-npm run pack:release
-npm run smoke:packed
-```
+### Maintainer candidate builds
 
-If an old WorkBuddy OpenGUI installation is running, finish or cancel its tasks and explicitly close its mirrors before upgrading. Quit WorkBuddy before switching configuration. Do not kill unrelated scrcpy/ADB processes. Run the following in the same terminal and source directory, stopping if any command fails:
-
-```sh
-OPENGUI_ARCHIVE="$PWD/dist/opengui-mcp-0.2.0.tgz"
-(cd dist && shasum -a 256 -c opengui-mcp-0.2.0.tgz.sha256)
-OPENGUI_NODE="$(node -p 'process.execPath')"
-mkdir -p "$HOME/.workbuddy/opengui/packages"
-OPENGUI_INSTALL="$(mktemp -d "$HOME/.workbuddy/opengui/packages/0.2.0-local.XXXXXX")"
-npm install --prefix "$OPENGUI_INSTALL" --no-audit --no-fund "$OPENGUI_ARCHIVE"
-node scripts/install-local.mjs \
-  --package-dir "$OPENGUI_INSTALL/node_modules/opengui-mcp" \
-  --node "$OPENGUI_NODE"
-```
-
-Keep that Node executable available: WorkBuddy uses its absolute path for MCP and Hooks. The installer runs from the built source checkout, not from inside the tarball. It records backups and incrementally updates `~/.workbuddy/mcp.json`, `~/.workbuddy/settings.json`, and `~/.workbuddy/skills/opengui/SKILL.md`. Each installation gets a new package directory; keep the old one for rollback. Do not use the connector ZIP's Release URL until the matching Release asset has been published.
+Build once with `npm ci`, `npm run pack:release`, and `npm run smoke:packed`
+in this directory. This build machine needs Node/npm and Xcode command-line tools.
+Transfer the tarball, sidecar and installer from `dist/` to the test Mac; the test
+Mac needs no build tools. The configuration installer is included inside the tarball.
 
 ### Verify the installation
 

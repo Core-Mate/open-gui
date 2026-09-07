@@ -65,8 +65,9 @@ jobs:
           version="${GITHUB_REF_NAME#opengui-codex-v}"
           archive="opengui-codex-$version.tar.gz"
           upload="opengui-codex-$version.zip"
-          test "$(find release-assets -maxdepth 1 -type f | wc -l | tr -d ' ')" = 4
-          (cd release-assets && sha256sum -c "$archive.sha256" && sha256sum -c "$upload.sha256")
+          installer="opengui-codex-$version-install.command"
+          test "$(find release-assets -maxdepth 1 -type f | wc -l | tr -d ' ')" = 6
+          (cd release-assets && sha256sum -c "$archive.sha256" && sha256sum -c "$upload.sha256" && sha256sum -c "$installer.sha256")
           tar -xOf "release-assets/$archive" opengui/docs/release-notes.md > "$RUNNER_TEMP/notes.md"
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             test "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft)" = true
@@ -76,6 +77,7 @@ jobs:
           fi
           gh release upload "$GITHUB_REF_NAME" \
             "release-assets/$archive" "release-assets/$archive.sha256" \
-            "release-assets/$upload" "release-assets/$upload.sha256" --clobber
+            "release-assets/$upload" "release-assets/$upload.sha256" \
+            "release-assets/$installer" "release-assets/$installer.sha256" --clobber
           # Keep the release draft until real-device acceptance is recorded.
           # Directory submission, approval, and publication are separate manual gates.

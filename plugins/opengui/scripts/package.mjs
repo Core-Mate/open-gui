@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdtemp, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdtemp, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
@@ -20,7 +20,9 @@ try {
   execFileSync('zip', ['-q', '-r', join(temp, 'package.zip'), 'opengui'], { cwd: temp, stdio: 'inherit' })
   await rename(join(temp, 'package.tar.gz'), archive)
   await rename(join(temp, 'package.zip'), upload)
-  for (const path of [archive, upload]) {
+  const installer = join(output, 'opengui-codex-' + pkg.version + '-install.command')
+  await copyFile(join(root, 'scripts/install-macos.command'), installer)
+  for (const path of [archive, upload, installer]) {
     const checksum = createHash('sha256').update(await readFile(path)).digest('hex')
     await writeFile(path + '.sha256', checksum + '  ' + path.slice(path.lastIndexOf('/') + 1) + '\n')
     console.log(path)

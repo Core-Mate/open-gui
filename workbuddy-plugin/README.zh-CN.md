@@ -16,34 +16,41 @@ DSH、Codex 的源码、依赖、安装配置、缓存和发布流程均不复�
 
 ## macOS 安装
 
-当前提供未发布候选版的源码安装路径，以 macOS、WorkBuddy 5.5.3 为验收基线。需要支持工具调用和图片的模型，以及 Git、Node.js 22.19 及以上的 22.x 或 24 及以上版本、npm。源码构建还需要 Xcode 命令行工具，可用 `xcode-select -p` 检查。ADB 已随包提供，scrcpy 会自动下载并校验，不需要通过 Homebrew 安装。使用预构建包不需要 Xcode，但当前尚无正式发布的候选包下载入口。
-
-克隆候选分支到新目录，不覆盖已有工作区：
+当前仍为未发布候选版。正式发布后，普通用户从对应 [WorkBuddy Release](https://github.com/Core-Mate/OpenGUI/releases)
+下载 `opengui-workbuddy-版本-install.command` 和它的 `.sha256`。结束旧 OpenGUI 任务、关闭投屏并退出 WorkBuddy 后，在下载目录运行：
 
 ```sh
-git clone --branch codex/workbuddy-vlm-persistent-mirror --single-branch \
-  https://github.com/Core-Mate/OpenGUI.git opengui-workbuddy-candidate
-cd opengui-workbuddy-candidate/workbuddy-plugin
+shasum -a 256 -c opengui-workbuddy-0.2.0-install.command.sha256
+bash opengui-workbuddy-0.2.0-install.command
+```
+
+安装器自动下载并校验预构建包、准备私有 Node 22.23.2、安装依赖，并备份及增量配置 MCP、Skill 和生命周期 Hooks。
+不需要 Git、系统 Node、pnpm、Xcode 或编译源码。需要访问 GitHub、nodejs.org 和 npm；ADB 随包提供，scrcpy 首次使用自动下载。
+其他 MCP 和 Hooks 保留，旧版本包不覆盖。安装完重开 WorkBuddy，按提示启用和信任 OpenGUI MCP。
+
+也可让 Agent 使用 [安装 Skill](../skills/opengui-plugin-install/SKILL.md)，说“帮我安装 OpenGUI WorkBuddy 插件”。
+没有完整发布资产时会停止并说明原因，不会改走源码构建。WorkBuddy 5.5.3、macOS 和支持图片与工具的模型仍是验收基线。
+
+### 开发者构建与候选测试
+
+以下只在维护者构建机器执行，需要 Node.js 22.19+ 的 22.x 或 24+、npm 和 Xcode 命令行工具：
+
+```sh
+cd workbuddy-plugin
 npm ci
 npm run pack:release
 npm run smoke:packed
 ```
 
-升级前先完成或取消旧 WorkBuddy OpenGUI 任务，明确关闭旧投屏窗口，再退出 WorkBuddy。不要批量终止 scrcpy 或 ADB 进程。以下命令在同一个终端、上述源码目录执行，任一步失败就停止：
+把 `dist/opengui-mcp-0.2.0.tgz`、其 `.sha256` 和 `dist/opengui-workbuddy-0.2.0-install.command`
+送到测试 Mac，退出 WorkBuddy 后运行：
 
 ```sh
-OPENGUI_ARCHIVE="$PWD/dist/opengui-mcp-0.2.0.tgz"
-(cd dist && shasum -a 256 -c opengui-mcp-0.2.0.tgz.sha256)
-OPENGUI_NODE="$(node -p 'process.execPath')"
-mkdir -p "$HOME/.workbuddy/opengui/packages"
-OPENGUI_INSTALL="$(mktemp -d "$HOME/.workbuddy/opengui/packages/0.2.0-local.XXXXXX")"
-npm install --prefix "$OPENGUI_INSTALL" --no-audit --no-fund "$OPENGUI_ARCHIVE"
-node scripts/install-local.mjs \
-  --package-dir "$OPENGUI_INSTALL/node_modules/opengui-mcp" \
-  --node "$OPENGUI_NODE"
+bash opengui-workbuddy-0.2.0-install.command --archive /绝对路径/opengui-mcp-0.2.0.tgz
 ```
 
-保留这个 Node 可执行文件，MCP 和 Hooks 使用它的绝对路径。安装脚本从已构建的源码目录运行，不在 tarball 内。安装器先备份，再增量更新 `~/.workbuddy/mcp.json`、`~/.workbuddy/settings.json` 和 `~/.workbuddy/skills/opengui/SKILL.md`，保留其他插件和 Hooks，拒绝软链接重定向。每次安装使用新目录，旧包保留用于回退。正式 Release 资源发布前，不要直接使用连接器 ZIP 中的 Release 下载地址。
+无需把源码、编译器或测试工具带到测试机器。底层 `scripts/install-local.mjs` 已随包提供；
+安装器统一调用它，用户不必手动建立目录、填写 Node 路径或逐项安装 Hooks。
 
 ### 安装验证与排查
 

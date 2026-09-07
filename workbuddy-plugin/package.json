@@ -6,7 +6,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "repository": { "type": "git", "url": "https://github.com/Core-Mate/OpenGUI.git", "directory": "workbuddy-plugin" },
   "bin": { "opengui-mcp": "lib/mcp.js" },
-  "files": ["lib", "assets", "LICENSE", "NOTICE.md", "README.md"],
+  "files": ["scripts/install-local.mjs", "lib", "assets", "LICENSE", "NOTICE.md", "README.md"],
   "engines": { "node": "^22.19.0 || >=24" },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/finalize.mjs",
