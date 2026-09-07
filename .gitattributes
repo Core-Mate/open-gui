@@ -1,0 +1,3 @@
+
+# Keep executable macOS installers usable after Windows checkouts.
+*.command text eol=lf

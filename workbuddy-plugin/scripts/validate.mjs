@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { readFile, readdir, stat } from 'node:fs/promises'
@@ -8,7 +9,9 @@ import { VERSION } from '../lib/state.js'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const json = async path => JSON.parse(await readFile(join(root, path), 'utf8'))
+if (process.platform !== 'win32') execFileSync('bash', ['-n', join(root, 'scripts/install-macos.command')])
 const pkg = await json('package.json')
+assert((await readFile(join(root, 'scripts/install-macos.command'), 'utf8')).split(/\r?\n/).includes('VERSION=' + pkg.version), 'Release installer version mismatch')
 const meta = await json('connector/connector-meta.json')
 const config = await json('connector/mcp.json')
 assert.equal(pkg.name, 'opengui-mcp')
