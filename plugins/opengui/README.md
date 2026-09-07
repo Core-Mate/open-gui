@@ -1,7 +1,7 @@
 # OpenGUI for Codex
 
 Standalone screenshot-guided Android control for **local Codex on macOS arm64/x64**.
-This is a candidate package, not a published or directory-approved release.
+This is a testing candidate, not a stable or directory-approved release.
 
 It includes a control Skill, local CLI/daemon, macOS ADB executable, and a read-only
 device wall. It does not depend on, modify, install, update, or reload DSH.
@@ -20,7 +20,7 @@ Start a **new chat**, choose OpenGUI, and ask to list connected phones without o
 For agent-assisted installation, use the repository's
 [installation Skill](../../skills/opengui-plugin-install/SKILL.md) and say
 “Install OpenGUI for Codex”. The Skill resolves only complete releases for this host.
-There is no public standalone download until the release gates below are satisfied.
+Public testing downloads are marked prerelease; stable publication requires the release gates below.
 
 The installer uses the independent `opengui-standalone` marketplace and leaves the
 repository's legacy marketplace unchanged. Finish OpenGUI tasks before upgrading.

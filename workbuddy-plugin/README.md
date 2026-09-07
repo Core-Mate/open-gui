@@ -2,7 +2,7 @@
 
 [中文说明](README.zh-CN.md)
 
-Independent local **MCP + Skill + lifecycle Hooks** connector for autonomous Android control, native read-only mirroring, and a read-only device wall. Version `0.2.0` (broker protocol `7`) is a local candidate, not a published release or a marketplace-approved connector.
+Independent local **MCP + Skill + lifecycle Hooks** connector for autonomous Android control, native read-only mirroring, and a read-only device wall. Version `0.2.0` (broker protocol `7`) is a testing candidate, not a stable release or a marketplace-approved connector.
 
 Every OpenGUI request begins with `opengui_start`, displaying all connected authorized phones without taking control locks. Windows are read-only and silent, and persist across task completion, cancellation and MCP recycling. Only user-requested closure or device/runtime failure ends them. Phone tasks use the current WorkBuddy VLM in a screenshot–action–screenshot loop; standalone viewing sends no images to the model. On macOS the bundled helper verifies initial window visibility and renderer readiness once per control task. Subsequent minimization, occlusion, desktop switching, closure or renderer exit does not revoke control: the model receives independent phone screenshots. Initial display failure is reported and blocks operation until startup succeeds; it is never silently bypassed. First use downloads verified scrcpy into the independent WorkBuddy cache.
 
