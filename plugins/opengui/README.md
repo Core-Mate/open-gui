@@ -129,3 +129,6 @@ Mac setup, actual Android tasks on one and two devices, both architectures, fina
 downloaded archive checksums, public policy URLs, and publisher identity. GitHub
 artifact creation is not OpenAI approval. Do not announce publication until the
 approved version has actually been published.
+
+Public testing releases are explicitly marked prerelease on GitHub. Publishing a testing
+prerelease does not complete desktop/device acceptance or authorize stable/directory publication.

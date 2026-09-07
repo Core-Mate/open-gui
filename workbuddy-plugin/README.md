@@ -98,14 +98,15 @@ Candidate tag convention: `opengui-workbuddy-v0.2.0` (not created by local insta
 
 - `dist/opengui-mcp-0.2.0.tgz` and `.sha256`
 - `dist/opengui-workbuddy-connector-0.2.0.zip` and `.sha256`
+- `dist/opengui-workbuddy-0.2.0-install.command` and `.sha256`
 
 The ZIP contains `opengui/connector-meta.json`, `mcp.json`, `icon.svg`, and `skills/control/SKILL.md`. Its npx command pins the matching GitHub Release tarball. Do not distribute this candidate manifest as installable until that asset exists. The tarball includes code, ADB, notices, and package metadata; npm resolves its pinned runtime dependencies. No npm publish step is required.
 
-The WorkBuddy-only workflows do not modify the DSH/Codex pipelines. Publishing additionally requires all real-host acceptance entries in `release-readiness.json` to be verified with evidence. A successful build, local archive, pushed commit, GitHub Release, and WorkBuddy marketplace approval are distinct states. Release assets are immutable; a rerun compares existing bytes and fails rather than replacing mismatched files.
+The WorkBuddy-only workflows do not modify the DSH/Codex pipelines. Stable publication additionally requires all real-host acceptance entries in `release-readiness.json` to be verified with evidence. A successful build, local archive, pushed commit, GitHub Release, and WorkBuddy marketplace approval are distinct states. Release assets are immutable; a rerun compares existing bytes and fails rather than replacing mismatched files.
 
 Submit the verified connector ZIP to the WorkBuddy team separately. See the official [connector format](https://open.workbuddy.cn/docs/connector) and [Skill format](https://open.workbuddy.cn/docs/skill).
 
-## Acceptance before release
+## Acceptance before stable release
 
 1. Load the candidate in the real WorkBuddy client, confirm eleven tools and actual images available to the selected model.
 2. Verify tap/swipe/ASCII and Unicode text/key/launch/wait on an authorized test phone. Never test payment, publication, or deletion on real accounts.
@@ -115,3 +116,11 @@ Submit the verified connector ZIP to the WorkBuddy team separately. See the offi
 6. Run packaged startup on all claimed desktop platforms. Record real-host evidence before marking the release gates verified.
 
 See [NOTICE.md](NOTICE.md) for the fixed public-source provenance and third-party notices.
+
+### Public testing and stable releases
+
+Namespaced tag pushes publish an explicitly marked GitHub prerelease with the verified
+prebuilt assets. This testing lane does not mark any manual acceptance item as passed.
+Stable publication uses a manual workflow dispatch on that same version tag with
+`prerelease=false`; all existing `release-readiness.json` checks and evidence remain required.
+Published assets remain immutable in both lanes. The public directory is a separate approval.

@@ -79,5 +79,6 @@ jobs:
             "release-assets/$archive" "release-assets/$archive.sha256" \
             "release-assets/$upload" "release-assets/$upload.sha256" \
             "release-assets/$installer" "release-assets/$installer.sha256" --clobber
-          # Keep the release draft until real-device acceptance is recorded.
+          # Stable publication requires real-device acceptance.
+          # The maintainer may explicitly publish this draft as a testing prerelease.
           # Directory submission, approval, and publication are separate manual gates.

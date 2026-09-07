@@ -87,3 +87,9 @@ bash opengui-workbuddy-0.2.0-install.command --archive /绝对路径/opengui-mcp
 自动测试、归档包和标准 MCP 冒烟检查不等于真实 WorkBuddy 验收。`release-readiness.json` 中的宿主图片接入、真机动作、双机隔离、自动续跑和停止恢复等项目全部验收后，专属发布流程才允许创建 GitHub Release。WorkBuddy 市场提交与审核另行进行。
 
 完整的接口流程、验证清单、隐私说明和来源见 [英文 README](README.md)、[Skill](connector/skills/control/SKILL.md) 和 [来源说明](NOTICE.md)。
+
+### 公开试用版与稳定版
+
+独立版本标签触发的发布标记为 GitHub 预发布版，供公开试用，不修改人工验收记录。
+稳定版需在同一标签上手动运行发布工作流并设置 `prerelease=false`，仍须通过全部真实宿主和设备验收。
+两条发布路径都保留不可变安装资产；市场上架另行审核。

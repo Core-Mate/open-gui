@@ -1,6 +1,12 @@
 name: WorkBuddy Plugin Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Publish for public testing (stable requires real-device acceptance)
+        type: boolean
+        default: true
   push:
     tags:
       - 'opengui-workbuddy-v*'
@@ -16,6 +22,8 @@ jobs:
   release:
     runs-on: macos-latest
     timeout-minutes: 20
+    env:
+      OPENGUI_PRERELEASE: ${{ github.event_name == 'push' || inputs.prerelease }}
     defaults:
       run:
         working-directory: workbuddy-plugin
@@ -33,7 +41,8 @@ jobs:
       - run: npm ci
       - run: npm run pack:release
       - run: npm run smoke:packed
-      - name: Require real WorkBuddy acceptance
+      - name: Require real WorkBuddy acceptance for stable publication
+        if: env.OPENGUI_PRERELEASE != 'true'
         run: node scripts/validate.mjs --release
       - name: Publish immutable WorkBuddy assets
         env:
