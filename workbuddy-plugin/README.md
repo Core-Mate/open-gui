@@ -2,9 +2,17 @@
 
 [中文说明](README.zh-CN.md)
 
-Independent local **MCP + Skill + lifecycle Hooks** connector for autonomous Android control, native read-only mirroring, and a read-only device wall. Version `0.2.0` (broker protocol `7`) is a testing candidate, not a stable release or a marketplace-approved connector.
+Independent local **MCP + Skill + lifecycle Hooks** connector for autonomous Android control, native read-only mirroring, and a read-only device wall. Version `0.2.1` (broker protocol `7`) is a testing candidate, not a stable release or a marketplace-approved connector.
 
 Every OpenGUI request begins with `opengui_start`, displaying all connected authorized phones without taking control locks. Windows are read-only and silent, and persist across task completion, cancellation and MCP recycling. Only user-requested closure or device/runtime failure ends them. Phone tasks use the current WorkBuddy VLM in a screenshot–action–screenshot loop; standalone viewing sends no images to the model. On macOS the bundled helper verifies initial window visibility and renderer readiness once per control task. Subsequent minimization, occlusion, desktop switching, closure or renderer exit does not revoke control: the model receives independent phone screenshots. Initial display failure is reported and blocks operation until startup succeeds; it is never silently bypassed. First use downloads verified scrcpy into the independent WorkBuddy cache.
+
+## Installer compatibility and repair
+
+Version 0.2.1 is an unpublished repair candidate; 0.2.0 is already a public prerelease. Use assets from the same published tag, or a maintainer-provided matching candidate archive.
+
+The installer checks the selected application before downloading: WorkBuddy 5.5.3 minimum, product-specific configuration directory, Hook declarations, and running Electron/helper processes. Use `--check` for a read-only preflight and `--app /absolute/WorkBuddy.app` when multiple bundles exist. The installer reads the application's `cli/product.json`, including the overseas `.workbuddy-ai` directory. A verified custom directory can be supplied with `--config-root`; `WORKBUDDY_CONFIG_DIR` and numbered instances are also supported.
+
+Host configuration is separate from the stable runtime directory `~/.workbuddy/opengui`. Per-configuration receipts preserve independent instances. Explicit `--repair-legacy` restores a confirmed mistaken legacy installation only when an installation receipt proves ownership and the entire file still matches the installed digest. Subsequent edits are retained and reported. Same-version installation reuses verified downloads and dependencies, returning `ALREADY_CONFIGURED` when configuration is unchanged. `CONFIG_WRITTEN` does not prove host loading, Hook delivery or phone acceptance; restart and verify read-only discovery first.
 
 ## What it does
 
@@ -42,7 +50,7 @@ system Node, Xcode, or user-run tests are required. Existing MCP servers, Hooks,
 configuration backups and old version directories are preserved. Reopen WorkBuddy
 and trust the MCP before read-only device discovery.
 
-For unpublished candidates use `bash scripts/install-macos.command --archive /absolute/opengui-mcp-0.2.0.tgz`
+For unpublished candidates use `bash scripts/install-macos.command --archive /absolute/opengui-mcp-0.2.1.tgz`
 with the adjacent `.sha256` file. This does not bypass public release acceptance.
 See the [Chinese installation guide](README.zh-CN.md#macos-安装) and the
 [agent installation Skill](../skills/opengui-plugin-install/SKILL.md).
@@ -65,7 +73,7 @@ If the Skill is missing, check `~/.workbuddy/skills/opengui/SKILL.md` and reopen
 
 ### Roll back
 
-Finish tasks, close WorkBuddy's OpenGUI mirrors and quit WorkBuddy. `~/.workbuddy/opengui/local-install.json` records each affected file and its backup. Restore the previous MCP and Hook configuration, Skill, and previous installation metadata if present, then reopen WorkBuddy. A `null` backup means that file did not exist before installation; remove only this installation's entries if other settings have since been added. Preserve subsequent unrelated edits, old packages and caches. Never reset the entire WorkBuddy configuration or touch DSH/Codex state.
+Finish tasks, close WorkBuddy's OpenGUI mirrors and quit WorkBuddy. `~/.workbuddy/opengui/local-install-<configuration-id>.json` records each affected file and its backup. Restore the previous MCP and Hook configuration, Skill, and previous installation metadata if present, then reopen WorkBuddy. A `null` backup means that file did not exist before installation; remove only this installation's entries if other settings have since been added. Preserve subsequent unrelated edits, old packages and caches. Never reset the entire WorkBuddy configuration or touch DSH/Codex state.
 
 ## Build and local testing
 
@@ -94,11 +102,11 @@ Builds on macOS require Xcode command-line tools and bundle arm64/x64 window hel
 
 ## Distribution
 
-Candidate tag convention: `opengui-workbuddy-v0.2.0` (not created by local installation). `pack:release` creates:
+Candidate tag convention: `opengui-workbuddy-v0.2.1` (not created by local installation). `pack:release` creates:
 
-- `dist/opengui-mcp-0.2.0.tgz` and `.sha256`
-- `dist/opengui-workbuddy-connector-0.2.0.zip` and `.sha256`
-- `dist/opengui-workbuddy-0.2.0-install.command` and `.sha256`
+- `dist/opengui-mcp-0.2.1.tgz` and `.sha256`
+- `dist/opengui-workbuddy-connector-0.2.1.zip` and `.sha256`
+- `dist/opengui-workbuddy-0.2.1-install.command` and `.sha256`
 
 The ZIP contains `opengui/connector-meta.json`, `mcp.json`, `icon.svg`, and `skills/control/SKILL.md`. Its npx command pins the matching GitHub Release tarball. Do not distribute this candidate manifest as installable until that asset exists. The tarball includes code, ADB, notices, and package metadata; npm resolves its pinned runtime dependencies. No npm publish step is required.
 

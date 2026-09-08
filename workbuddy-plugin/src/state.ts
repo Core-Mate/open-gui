@@ -3,7 +3,7 @@ import { lstat, mkdir, open, readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
 
-export const VERSION = '0.2.0'
+export const VERSION = '0.2.1'
 export const BROKER_PROTOCOL = 7
 
 export function workbuddyStateDir(override?: string): string {
