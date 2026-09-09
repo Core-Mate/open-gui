@@ -1,3 +1,11 @@
+# OpenGUI for WorkBuddy 0.2.1 candidate
+
+- Discover the selected WorkBuddy bundle and its product-specific configuration root before downloading packages.
+- Reject hosts below 5.5.3, missing lifecycle Hook declarations, and running Electron or helper processes.
+- Keep runtime state stable while repairing host configuration; offer explicit repair of unchanged installer-owned legacy files and keep per-configuration receipts.
+- Reuse verified package downloads and installed dependencies; make same-version configuration updates idempotent.
+- Report preflight and configuration status separately from real host loading and device acceptance.
+
 # OpenGUI for WorkBuddy 0.2.0 candidate
 
 Not released. Broker protocol 7 requires an explicit local runtime switch.

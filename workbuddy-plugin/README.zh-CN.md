@@ -1,6 +1,6 @@
 # OpenGUI WorkBuddy 连接器
 
-独立的本地 MCP + Skill + 生命周期 Hook 插件，提供 Android 手机自动操作、scrcpy 只读独立投屏窗口和只读设备墙。当前 `0.2.0`（broker 协议 `7`）是本地候选版本，尚未正式发布或通过 WorkBuddy 市场审核。
+独立的本地 MCP + Skill + 生命周期 Hook 插件，提供 Android 手机自动操作、scrcpy 只读独立投屏窗口和只读设备墙。当前 `0.2.1`（broker 协议 `7`）是本地修复候选版本；`0.2.0` 已公开预发布。稳定版和 WorkBuddy 市场审核另行验收。
 
 每次调起 OpenGUI，Skill 首先调用 `opengui_start`，自动展示全部已连接且已授权的手机。投屏只读、静音，不占用控制锁；任务结束、取消、回复结束或 MCP 重连均不关闭窗口。首次展示验证通过后，最小化、遮挡、切换桌面、关窗或渲染进程退出只影响观看，不暂停手机任务、不抢焦点。取消任务应调用 `opengui_cancel`，不是关闭窗口；下次明确调起时恢复投屏。纯观看不发送模型截图；正常手机任务必须通过截图 → VLM 判断 → 单步操作 → 新截图完成闭环。真机断线会撤销观察凭据，重连或截图失败后必须重新观察，不自动重放操作。
 
@@ -16,12 +16,12 @@ DSH、Codex 的源码、依赖、安装配置、缓存和发布流程均不复�
 
 ## macOS 安装
 
-当前仍为未发布候选版。正式发布后，普通用户从对应 [WorkBuddy Release](https://github.com/Core-Mate/OpenGUI/releases)
-下载 `opengui-workbuddy-版本-install.command` 和它的 `.sha256`。结束旧 OpenGUI 任务、关闭投屏并退出 WorkBuddy 后，在下载目录运行：
+普通用户从对应 [WorkBuddy Release](https://github.com/Core-Mate/OpenGUI/releases)
+选择已发布的版本，下载对应 `opengui-workbuddy-版本-install.command` 和它的 `.sha256`。以下 `0.2.1` 命令仅用于该版本发布后，未发布候选请使用维护者提供的匹配归档。结束旧 OpenGUI 任务、关闭投屏并退出 WorkBuddy 后，在下载目录运行：
 
 ```sh
-shasum -a 256 -c opengui-workbuddy-0.2.0-install.command.sha256
-bash opengui-workbuddy-0.2.0-install.command
+shasum -a 256 -c opengui-workbuddy-0.2.1-install.command.sha256
+bash opengui-workbuddy-0.2.1-install.command
 ```
 
 安装器自动下载并校验预构建包、准备私有 Node 22.23.2、安装依赖，并备份及增量配置 MCP、Skill 和生命周期 Hooks。
@@ -30,6 +30,23 @@ bash opengui-workbuddy-0.2.0-install.command
 
 也可让 Agent 使用 [安装 Skill](../skills/opengui-plugin-install/SKILL.md)，说“帮我安装 OpenGUI WorkBuddy 插件”。
 没有完整发布资产时会停止并说明原因，不会改走源码构建。WorkBuddy 5.5.3、macOS 和支持图片与工具的模型仍是验收基线。
+
+### 安装前检查与旧安装修复
+
+安装器在下载前识别 WorkBuddy 的应用身份、版本、产品目录及生命周期 Hook 声明。最低版本为 5.5.3；5.5.2 会提前停止并提示升级，不安装功能不完整的续跑配置。国内/海外版的目录来自应用自身 `cli/product.json`，不根据目录是否存在猜测。
+
+```sh
+bash opengui-workbuddy-0.2.1-install.command --check
+# 多个版本并存或应用放在非标准目录时，指定要使用的应用：
+bash opengui-workbuddy-0.2.1-install.command --app "/Applications/WorkBuddy.app"
+```
+
+`--check` 只读，不下载、不写配置。检测到主进程 Electron 或应用 Helper 时，需要结束任务后用 Command-Q 退出。DMG 上运行的应用同样会被检测。
+自定义实例可使用与宿主一致的 `WORKBUDDY_CONFIG_DIR`，或显式 `--config-root /已核实的目录`；该参数不能把不支持的宿主变成受支持版本。
+
+MCP、Skill、Hooks 写入识别出的宿主目录；运行数据和旧包继续保存在 `~/.workbuddy/opengui`，安装记录按配置目录独立保存。已确认旧版误写目录时，可加 `--repair-legacy`：只有旧格式安装记录能证明归属且文件内容未被修改，才恢复原文件；普通安装保留其他目录。存在后续修改的文件保留，并在 `migration` 结果中标为 `retained`，不覆盖用户数据。没有安装记录的旧文件不会自动删除。
+
+同版本重装复用校验过的归档和依赖；配置相同时返回 `ALREADY_CONFIGURED`。阶段输出包含耗时。`CONFIG_WRITTEN` 仅代表配置已写入，不代表宿主加载或 Hook 续跑已验证；仍须重启并完成下方检查。
 
 ### 开发者构建与候选测试
 
@@ -42,11 +59,11 @@ npm run pack:release
 npm run smoke:packed
 ```
 
-把 `dist/opengui-mcp-0.2.0.tgz`、其 `.sha256` 和 `dist/opengui-workbuddy-0.2.0-install.command`
+把 `dist/opengui-mcp-0.2.1.tgz`、其 `.sha256` 和 `dist/opengui-workbuddy-0.2.1-install.command`
 送到测试 Mac，退出 WorkBuddy 后运行：
 
 ```sh
-bash opengui-workbuddy-0.2.0-install.command --archive /绝对路径/opengui-mcp-0.2.0.tgz
+bash opengui-workbuddy-0.2.1-install.command --archive /绝对路径/opengui-mcp-0.2.1.tgz
 ```
 
 无需把源码、编译器或测试工具带到测试机器。底层 `scripts/install-local.mjs` 已随包提供；
@@ -59,11 +76,11 @@ bash opengui-workbuddy-0.2.0-install.command --archive /绝对路径/opengui-mcp
 3. 输入 `/opengui` 并选中技能，发送“列出已连接手机，不操作手机”，确认工具可用且返回真实设备状态。
 4. 在允许截图发送给当前模型的手机上，发送“打开手机设置，查看并告诉我 Android 版本”。核对实际投屏窗口、看图操作、结果和任务结束后的控制锁释放，投屏应继续保留。
 
-找不到技能时，检查 `~/.workbuddy/skills/opengui/SKILL.md` 并重开 WorkBuddy，只配置 MCP 不够。找不到工具时，检查宿主的 MCP 信任和连接状态，以及 Node、安装包路径。提示无法自动续跑时，检查 `settings.json` 中是否保留本插件的生命周期 Hooks，不要用反复输入“继续”代替修复。USB 授权和 macOS 权限弹窗需要用户在系统界面批准。构建和冒烟检查通过，不等于桌面和真机验收通过。
+找不到技能时，检查安装结果所示配置目录中的 `skills/opengui/SKILL.md` 并重开 WorkBuddy，只配置 MCP 不够。找不到工具时，检查宿主的 MCP 信任和连接状态，以及 Node、安装包路径。提示无法自动续跑时，检查 `settings.json` 中是否保留本插件的生命周期 Hooks，不要用反复输入“继续”代替修复。USB 授权和 macOS 权限弹窗需要用户在系统界面批准。构建和冒烟检查通过，不等于桌面和真机验收通过。
 
 ### 回退
 
-结束任务，关闭 WorkBuddy OpenGUI 投屏并退出 WorkBuddy。`~/.workbuddy/opengui/local-install.json` 记录配置文件及对应备份，恢复上一版 MCP、Hook 配置、Skill，以及存在的上一版安装元数据，再重开 WorkBuddy。备份为 `null` 表示安装前没有该文件；如果此后加入其他配置，只移除本次安装的条目。保留后续无关修改、旧包和缓存，不重置整个 WorkBuddy 配置，不动 DSH/Codex 数据。
+结束任务，关闭 WorkBuddy OpenGUI 投屏并退出 WorkBuddy。`~/.workbuddy/opengui/local-install-<配置标识>.json` 记录配置文件及对应备份，恢复上一版 MCP、Hook 配置、Skill，以及存在的上一版安装元数据，再重开 WorkBuddy。备份为 `null` 表示安装前没有该文件；如果此后加入其他配置，只移除本次安装的条目。保留后续无关修改、旧包和缓存，不重置整个 WorkBuddy 配置，不动 DSH/Codex 数据。
 
 ## 使用方式
 
@@ -82,7 +99,7 @@ bash opengui-workbuddy-0.2.0-install.command --archive /绝对路径/opengui-mcp
 
 ## 交付与发布
 
-候选版本标签约定：`opengui-workbuddy-v0.2.0`；本地安装不会创建标签。打包产物是 `dist/` 中的 MCP `.tgz`、连接器 `.zip` 及对应 SHA-256 文件，不需要发布到 npm。
+候选版本标签约定：`opengui-workbuddy-v0.2.1`；本地安装不会创建标签。打包产物是 `dist/` 中的 MCP `.tgz`、连接器 `.zip` 及对应 SHA-256 文件，不需要发布到 npm。
 
 自动测试、归档包和标准 MCP 冒烟检查不等于真实 WorkBuddy 验收。`release-readiness.json` 中的宿主图片接入、真机动作、双机隔离、自动续跑和停止恢复等项目全部验收后，专属发布流程才允许创建 GitHub Release。WorkBuddy 市场提交与审核另行进行。
 
